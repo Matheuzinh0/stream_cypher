@@ -1,0 +1,5 @@
+Massey-Omura(Multiplicações rápidas sobre GF(2^e))
+Cifra SNOW-V
+Projeto de FSM: LCG_GF(2^e)-->FSM_no_linear->stream_cypher^plaintext->textcypher
+		plaintext--------------------------------------|
+definição de clock irregular- a unidade de controle de clock deve ser definida por bits do próprio estado interno do gerador, assim um atacante não poderá descrever matemáticamente qual função F(K) controla o clock.

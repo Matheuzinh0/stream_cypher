@@ -1,0 +1,412 @@
+========================================================
+ SIMULAÇÃO MONTE CARLO: EFEITO ESPACIAL DOS BITS DE CLOCK
+========================================================
+
+--------------------------------------------------------
+CONFIGURAÇÃO 1 | Grau N = 31
+ h(x) = 31 13 8 3 0
+ a(x) = 4 0
+--------------------------------------------------------
+
+  [>] TAPS DE CONTROLE: {1, 2, 3}
+      Topologia: CONCENTRADOS NO INICIO (A diferença atinge o relógio quase instantaneamente)
+      -> TAXA DE SOBREVIVÊNCIA DA DIFERENÇA: 99.70%
+      -> EVOLUÇÃO DO PESO DE HAMMING (Difusão Média):
+         T=  0 | Média de 1.00 bits diferentes
+         T= 10 | Média de 1.74 bits diferentes
+         T= 20 | Média de 1.74 bits diferentes
+         T= 30 | Média de 1.74 bits diferentes
+         T= 40 | Média de 1.74 bits diferentes
+         T= 50 | Média de 1.74 bits diferentes
+         T= 60 | Média de 1.74 bits diferentes
+         T= 70 | Média de 1.74 bits diferentes
+         T= 80 | Média de 1.74 bits diferentes
+         T= 90 | Média de 1.74 bits diferentes
+
+  [>] TAPS DE CONTROLE: {7, 15, 23}
+      Topologia: ESPALHADOS ESTRATEGICAMENTE (Difusão regular)
+      -> TAXA DE SOBREVIVÊNCIA DA DIFERENÇA: 100.00%
+      -> EVOLUÇÃO DO PESO DE HAMMING (Difusão Média):
+         T=  0 | Média de 1.00 bits diferentes
+         T= 10 | Média de 1.74 bits diferentes
+         T= 20 | Média de 1.74 bits diferentes
+         T= 30 | Média de 1.74 bits diferentes
+         T= 40 | Média de 1.74 bits diferentes
+         T= 50 | Média de 1.74 bits diferentes
+         T= 60 | Média de 1.74 bits diferentes
+         T= 70 | Média de 1.74 bits diferentes
+         T= 80 | Média de 1.74 bits diferentes
+         T= 90 | Média de 1.74 bits diferentes
+
+  [>] TAPS DE CONTROLE: {28, 29, 30}
+      Topologia: CONCENTRADOS NO FINAL (A diferença viaja o máximo possível antes do impacto)
+      -> TAXA DE SOBREVIVÊNCIA DA DIFERENÇA: 99.40%
+      -> EVOLUÇÃO DO PESO DE HAMMING (Difusão Média):
+         T=  0 | Média de 1.00 bits diferentes
+         T= 10 | Média de 1.78 bits diferentes
+         T= 20 | Média de 1.78 bits diferentes
+         T= 30 | Média de 1.78 bits diferentes
+         T= 40 | Média de 1.78 bits diferentes
+         T= 50 | Média de 1.78 bits diferentes
+         T= 60 | Média de 1.78 bits diferentes
+         T= 70 | Média de 1.78 bits diferentes
+         T= 80 | Média de 1.78 bits diferentes
+         T= 90 | Média de 1.78 bits diferentes
+
+--------------------------------------------------------
+CONFIGURAÇÃO 2 | Grau N = 64
+ h(x) = 64 11 2 1 0
+ a(x) = 4 0
+--------------------------------------------------------
+
+  [>] TAPS DE CONTROLE: {1, 2, 3}
+      Topologia: CONCENTRADOS NO INICIO (A diferença atinge o relógio quase instantaneamente)
+      -> TAXA DE SOBREVIVÊNCIA DA DIFERENÇA: 100.00%
+      -> EVOLUÇÃO DO PESO DE HAMMING (Difusão Média):
+         T=  0 | Média de 1.00 bits diferentes
+         T= 10 | Média de 1.71 bits diferentes
+         T= 20 | Média de 1.71 bits diferentes
+         T= 30 | Média de 1.71 bits diferentes
+         T= 40 | Média de 1.71 bits diferentes
+         T= 50 | Média de 1.71 bits diferentes
+         T= 60 | Média de 1.71 bits diferentes
+         T= 70 | Média de 1.71 bits diferentes
+         T= 80 | Média de 1.71 bits diferentes
+         T= 90 | Média de 1.71 bits diferentes
+
+  [>] TAPS DE CONTROLE: {16, 32, 48}
+      Topologia: ESPALHADOS ESTRATEGICAMENTE (Difusão regular)
+      -> TAXA DE SOBREVIVÊNCIA DA DIFERENÇA: 96.60%
+      -> EVOLUÇÃO DO PESO DE HAMMING (Difusão Média):
+         T=  0 | Média de 1.00 bits diferentes
+         T= 10 | Média de 2.61 bits diferentes
+         T= 20 | Média de 2.61 bits diferentes
+         T= 30 | Média de 2.61 bits diferentes
+         T= 40 | Média de 2.61 bits diferentes
+         T= 50 | Média de 2.61 bits diferentes
+         T= 60 | Média de 2.61 bits diferentes
+         T= 70 | Média de 2.61 bits diferentes
+         T= 80 | Média de 2.61 bits diferentes
+         T= 90 | Média de 2.61 bits diferentes
+
+  [>] TAPS DE CONTROLE: {61, 62, 63}
+      Topologia: CONCENTRADOS NO FINAL (A diferença viaja o máximo possível antes do impacto)
+      -> TAXA DE SOBREVIVÊNCIA DA DIFERENÇA: 100.00%
+      -> EVOLUÇÃO DO PESO DE HAMMING (Difusão Média):
+         T=  0 | Média de 1.00 bits diferentes
+         T= 10 | Média de 1.68 bits diferentes
+         T= 20 | Média de 1.68 bits diferentes
+         T= 30 | Média de 1.68 bits diferentes
+         T= 40 | Média de 1.68 bits diferentes
+         T= 50 | Média de 1.68 bits diferentes
+         T= 60 | Média de 1.68 bits diferentes
+         T= 70 | Média de 1.68 bits diferentes
+         T= 80 | Média de 1.68 bits diferentes
+         T= 90 | Média de 1.68 bits diferentes
+
+--------------------------------------------------------
+CONFIGURAÇÃO 3 | Grau N = 64
+ h(x) = 64 42 33 22 0
+ a(x) = 5 0
+--------------------------------------------------------
+
+  [>] TAPS DE CONTROLE: {1, 2, 3}
+      Topologia: CONCENTRADOS NO INICIO (A diferença atinge o relógio quase instantaneamente)
+      -> TAXA DE SOBREVIVÊNCIA DA DIFERENÇA: 100.00%
+      -> EVOLUÇÃO DO PESO DE HAMMING (Difusão Média):
+         T=  0 | Média de 1.00 bits diferentes
+         T= 10 | Média de 1.76 bits diferentes
+         T= 20 | Média de 1.76 bits diferentes
+         T= 30 | Média de 1.76 bits diferentes
+         T= 40 | Média de 1.76 bits diferentes
+         T= 50 | Média de 1.76 bits diferentes
+         T= 60 | Média de 1.76 bits diferentes
+         T= 70 | Média de 1.76 bits diferentes
+         T= 80 | Média de 1.76 bits diferentes
+         T= 90 | Média de 1.76 bits diferentes
+
+  [>] TAPS DE CONTROLE: {16, 32, 48}
+      Topologia: ESPALHADOS ESTRATEGICAMENTE (Difusão regular)
+      -> TAXA DE SOBREVIVÊNCIA DA DIFERENÇA: 100.00%
+      -> EVOLUÇÃO DO PESO DE HAMMING (Difusão Média):
+         T=  0 | Média de 1.00 bits diferentes
+         T= 10 | Média de 1.80 bits diferentes
+         T= 20 | Média de 1.80 bits diferentes
+         T= 30 | Média de 1.80 bits diferentes
+         T= 40 | Média de 1.80 bits diferentes
+         T= 50 | Média de 1.80 bits diferentes
+         T= 60 | Média de 1.80 bits diferentes
+         T= 70 | Média de 1.80 bits diferentes
+         T= 80 | Média de 1.80 bits diferentes
+         T= 90 | Média de 1.80 bits diferentes
+
+  [>] TAPS DE CONTROLE: {61, 62, 63}
+      Topologia: CONCENTRADOS NO FINAL (A diferença viaja o máximo possível antes do impacto)
+      -> TAXA DE SOBREVIVÊNCIA DA DIFERENÇA: 100.00%
+      -> EVOLUÇÃO DO PESO DE HAMMING (Difusão Média):
+         T=  0 | Média de 1.00 bits diferentes
+         T= 10 | Média de 1.69 bits diferentes
+         T= 20 | Média de 1.70 bits diferentes
+         T= 30 | Média de 1.70 bits diferentes
+         T= 40 | Média de 1.70 bits diferentes
+         T= 50 | Média de 1.70 bits diferentes
+         T= 60 | Média de 1.70 bits diferentes
+         T= 70 | Média de 1.70 bits diferentes
+         T= 80 | Média de 1.70 bits diferentes
+         T= 90 | Média de 1.70 bits diferentes
+
+--------------------------------------------------------
+CONFIGURAÇÃO 4 | Grau N = 128
+ h(x) = 128 79 51 29 0
+ a(x) = 5 0
+--------------------------------------------------------
+
+  [>] TAPS DE CONTROLE: {1, 2, 3}
+      Topologia: CONCENTRADOS NO INICIO (A diferença atinge o relógio quase instantaneamente)
+      -> TAXA DE SOBREVIVÊNCIA DA DIFERENÇA: 100.00%
+      -> EVOLUÇÃO DO PESO DE HAMMING (Difusão Média):
+         T=  0 | Média de 1.00 bits diferentes
+         T= 10 | Média de 1.67 bits diferentes
+         T= 20 | Média de 1.67 bits diferentes
+         T= 30 | Média de 1.67 bits diferentes
+         T= 40 | Média de 1.67 bits diferentes
+         T= 50 | Média de 1.67 bits diferentes
+         T= 60 | Média de 1.67 bits diferentes
+         T= 70 | Média de 1.67 bits diferentes
+         T= 80 | Média de 1.67 bits diferentes
+         T= 90 | Média de 1.67 bits diferentes
+
+  [>] TAPS DE CONTROLE: {32, 64, 96}
+      Topologia: ESPALHADOS ESTRATEGICAMENTE (Difusão regular)
+      -> TAXA DE SOBREVIVÊNCIA DA DIFERENÇA: 100.00%
+      -> EVOLUÇÃO DO PESO DE HAMMING (Difusão Média):
+         T=  0 | Média de 1.00 bits diferentes
+         T= 10 | Média de 1.69 bits diferentes
+         T= 20 | Média de 1.69 bits diferentes
+         T= 30 | Média de 1.69 bits diferentes
+         T= 40 | Média de 1.69 bits diferentes
+         T= 50 | Média de 1.69 bits diferentes
+         T= 60 | Média de 1.69 bits diferentes
+         T= 70 | Média de 1.69 bits diferentes
+         T= 80 | Média de 1.69 bits diferentes
+         T= 90 | Média de 1.69 bits diferentes
+
+  [>] TAPS DE CONTROLE: {125, 126, 127}
+      Topologia: CONCENTRADOS NO FINAL (A diferença viaja o máximo possível antes do impacto)
+      -> TAXA DE SOBREVIVÊNCIA DA DIFERENÇA: 100.00%
+      -> EVOLUÇÃO DO PESO DE HAMMING (Difusão Média):
+         T=  0 | Média de 1.00 bits diferentes
+         T= 10 | Média de 1.71 bits diferentes
+         T= 20 | Média de 1.71 bits diferentes
+         T= 30 | Média de 1.71 bits diferentes
+         T= 40 | Média de 1.71 bits diferentes
+         T= 50 | Média de 1.71 bits diferentes
+         T= 60 | Média de 1.71 bits diferentes
+         T= 70 | Média de 1.71 bits diferentes
+         T= 80 | Média de 1.71 bits diferentes
+         T= 90 | Média de 1.71 bits diferentes
+
+--------------------------------------------------------
+CONFIGURAÇÃO 5 | Grau N = 256
+ h(x) = 256 213 141 51 0
+ a(x) = 6 0
+--------------------------------------------------------
+
+  [>] TAPS DE CONTROLE: {1, 2, 3}
+      Topologia: CONCENTRADOS NO INICIO (A diferença atinge o relógio quase instantaneamente)
+      -> TAXA DE SOBREVIVÊNCIA DA DIFERENÇA: 100.00%
+      -> EVOLUÇÃO DO PESO DE HAMMING (Difusão Média):
+         T=  0 | Média de 1.00 bits diferentes
+         T= 10 | Média de 1.68 bits diferentes
+         T= 20 | Média de 1.68 bits diferentes
+         T= 30 | Média de 1.68 bits diferentes
+         T= 40 | Média de 1.68 bits diferentes
+         T= 50 | Média de 1.68 bits diferentes
+         T= 60 | Média de 1.68 bits diferentes
+         T= 70 | Média de 1.68 bits diferentes
+         T= 80 | Média de 1.68 bits diferentes
+         T= 90 | Média de 1.68 bits diferentes
+
+  [>] TAPS DE CONTROLE: {64, 128, 192}
+      Topologia: ESPALHADOS ESTRATEGICAMENTE (Difusão regular)
+      -> TAXA DE SOBREVIVÊNCIA DA DIFERENÇA: 100.00%
+      -> EVOLUÇÃO DO PESO DE HAMMING (Difusão Média):
+         T=  0 | Média de 1.00 bits diferentes
+         T= 10 | Média de 1.73 bits diferentes
+         T= 20 | Média de 1.73 bits diferentes
+         T= 30 | Média de 1.73 bits diferentes
+         T= 40 | Média de 1.73 bits diferentes
+         T= 50 | Média de 1.73 bits diferentes
+         T= 60 | Média de 1.73 bits diferentes
+         T= 70 | Média de 1.73 bits diferentes
+         T= 80 | Média de 1.73 bits diferentes
+         T= 90 | Média de 1.73 bits diferentes
+
+  [>] TAPS DE CONTROLE: {253, 254, 255}
+      Topologia: CONCENTRADOS NO FINAL (A diferença viaja o máximo possível antes do impacto)
+      -> TAXA DE SOBREVIVÊNCIA DA DIFERENÇA: 100.00%
+      -> EVOLUÇÃO DO PESO DE HAMMING (Difusão Média):
+         T=  0 | Média de 1.00 bits diferentes
+         T= 10 | Média de 1.69 bits diferentes
+         T= 20 | Média de 1.70 bits diferentes
+         T= 30 | Média de 1.70 bits diferentes
+         T= 40 | Média de 1.70 bits diferentes
+         T= 50 | Média de 1.70 bits diferentes
+         T= 60 | Média de 1.70 bits diferentes
+         T= 70 | Média de 1.70 bits diferentes
+         T= 80 | Média de 1.70 bits diferentes
+         T= 90 | Média de 1.70 bits diferentes
+
+--------------------------------------------------------
+CONFIGURAÇÃO 6 | Grau N = 271
+ h(x) = 271 188 121 93 0
+ a(x) = 145 116 92 72 0
+--------------------------------------------------------
+
+  [>] TAPS DE CONTROLE: {1, 2, 3}
+      Topologia: CONCENTRADOS NO INICIO (A diferença atinge o relógio quase instantaneamente)
+      -> TAXA DE SOBREVIVÊNCIA DA DIFERENÇA: 98.00%
+      -> EVOLUÇÃO DO PESO DE HAMMING (Difusão Média):
+         T=  0 | Média de 1.00 bits diferentes
+         T= 10 | Média de 11.34 bits diferentes
+         T= 20 | Média de 11.34 bits diferentes
+         T= 30 | Média de 11.34 bits diferentes
+         T= 40 | Média de 11.34 bits diferentes
+         T= 50 | Média de 11.34 bits diferentes
+         T= 60 | Média de 11.34 bits diferentes
+         T= 70 | Média de 11.34 bits diferentes
+         T= 80 | Média de 11.34 bits diferentes
+         T= 90 | Média de 11.34 bits diferentes
+
+  [>] TAPS DE CONTROLE: {67, 135, 203}
+      Topologia: ESPALHADOS ESTRATEGICAMENTE (Difusão regular)
+      -> TAXA DE SOBREVIVÊNCIA DA DIFERENÇA: 95.80%
+      -> EVOLUÇÃO DO PESO DE HAMMING (Difusão Média):
+         T=  0 | Média de 1.00 bits diferentes
+         T= 10 | Média de 12.68 bits diferentes
+         T= 20 | Média de 12.67 bits diferentes
+         T= 30 | Média de 12.67 bits diferentes
+         T= 40 | Média de 12.67 bits diferentes
+         T= 50 | Média de 12.67 bits diferentes
+         T= 60 | Média de 12.67 bits diferentes
+         T= 70 | Média de 12.67 bits diferentes
+         T= 80 | Média de 12.67 bits diferentes
+         T= 90 | Média de 12.67 bits diferentes
+
+  [>] TAPS DE CONTROLE: {268, 269, 270}
+      Topologia: CONCENTRADOS NO FINAL (A diferença viaja o máximo possível antes do impacto)
+      -> TAXA DE SOBREVIVÊNCIA DA DIFERENÇA: 91.00%
+      -> EVOLUÇÃO DO PESO DE HAMMING (Difusão Média):
+         T=  0 | Média de 1.00 bits diferentes
+         T= 10 | Média de 17.52 bits diferentes
+         T= 20 | Média de 17.56 bits diferentes
+         T= 30 | Média de 17.56 bits diferentes
+         T= 40 | Média de 17.56 bits diferentes
+         T= 50 | Média de 17.56 bits diferentes
+         T= 60 | Média de 17.56 bits diferentes
+         T= 70 | Média de 17.56 bits diferentes
+         T= 80 | Média de 17.56 bits diferentes
+         T= 90 | Média de 17.56 bits diferentes
+
+--------------------------------------------------------
+CONFIGURAÇÃO 7 | Grau N = 291
+ h(x) = 291 240 202 178 0
+ a(x) = 245 99 64 4 0
+--------------------------------------------------------
+
+  [>] TAPS DE CONTROLE: {1, 2, 3}
+      Topologia: CONCENTRADOS NO INICIO (A diferença atinge o relógio quase instantaneamente)
+      -> TAXA DE SOBREVIVÊNCIA DA DIFERENÇA: 96.10%
+      -> EVOLUÇÃO DO PESO DE HAMMING (Difusão Média):
+         T=  0 | Média de 1.00 bits diferentes
+         T= 10 | Média de 17.08 bits diferentes
+         T= 20 | Média de 17.08 bits diferentes
+         T= 30 | Média de 17.08 bits diferentes
+         T= 40 | Média de 17.08 bits diferentes
+         T= 50 | Média de 17.08 bits diferentes
+         T= 60 | Média de 17.08 bits diferentes
+         T= 70 | Média de 17.08 bits diferentes
+         T= 80 | Média de 17.08 bits diferentes
+         T= 90 | Média de 17.08 bits diferentes
+
+  [>] TAPS DE CONTROLE: {72, 145, 218}
+      Topologia: ESPALHADOS ESTRATEGICAMENTE (Difusão regular)
+      -> TAXA DE SOBREVIVÊNCIA DA DIFERENÇA: 87.60%
+      -> EVOLUÇÃO DO PESO DE HAMMING (Difusão Média):
+         T=  0 | Média de 1.00 bits diferentes
+         T= 10 | Média de 21.51 bits diferentes
+         T= 20 | Média de 21.51 bits diferentes
+         T= 30 | Média de 21.51 bits diferentes
+         T= 40 | Média de 21.51 bits diferentes
+         T= 50 | Média de 21.51 bits diferentes
+         T= 60 | Média de 21.51 bits diferentes
+         T= 70 | Média de 21.51 bits diferentes
+         T= 80 | Média de 21.51 bits diferentes
+         T= 90 | Média de 21.51 bits diferentes
+
+  [>] TAPS DE CONTROLE: {288, 289, 290}
+      Topologia: CONCENTRADOS NO FINAL (A diferença viaja o máximo possível antes do impacto)
+      -> TAXA DE SOBREVIVÊNCIA DA DIFERENÇA: 93.10%
+      -> EVOLUÇÃO DO PESO DE HAMMING (Difusão Média):
+         T=  0 | Média de 1.00 bits diferentes
+         T= 10 | Média de 18.40 bits diferentes
+         T= 20 | Média de 18.40 bits diferentes
+         T= 30 | Média de 18.40 bits diferentes
+         T= 40 | Média de 18.40 bits diferentes
+         T= 50 | Média de 18.40 bits diferentes
+         T= 60 | Média de 18.40 bits diferentes
+         T= 70 | Média de 18.40 bits diferentes
+         T= 80 | Média de 18.40 bits diferentes
+         T= 90 | Média de 18.40 bits diferentes
+
+--------------------------------------------------------
+CONFIGURAÇÃO 8 | Grau N = 451
+ h(x) = 451 402 292 9 0
+ a(x) = 406 360 168 7 0
+--------------------------------------------------------
+
+  [>] TAPS DE CONTROLE: {1, 2, 3}
+      Topologia: CONCENTRADOS NO INICIO (A diferença atinge o relógio quase instantaneamente)
+      -> TAXA DE SOBREVIVÊNCIA DA DIFERENÇA: 93.30%
+      -> EVOLUÇÃO DO PESO DE HAMMING (Difusão Média):
+         T=  0 | Média de 1.00 bits diferentes
+         T= 10 | Média de 34.16 bits diferentes
+         T= 20 | Média de 34.15 bits diferentes
+         T= 30 | Média de 34.15 bits diferentes
+         T= 40 | Média de 34.15 bits diferentes
+         T= 50 | Média de 34.15 bits diferentes
+         T= 60 | Média de 34.15 bits diferentes
+         T= 70 | Média de 34.15 bits diferentes
+         T= 80 | Média de 34.15 bits diferentes
+         T= 90 | Média de 34.15 bits diferentes
+
+  [>] TAPS DE CONTROLE: {112, 225, 338}
+      Topologia: ESPALHADOS ESTRATEGICAMENTE (Difusão regular)
+      -> TAXA DE SOBREVIVÊNCIA DA DIFERENÇA: 92.30%
+      -> EVOLUÇÃO DO PESO DE HAMMING (Difusão Média):
+         T=  0 | Média de 1.00 bits diferentes
+         T= 10 | Média de 37.73 bits diferentes
+         T= 20 | Média de 37.73 bits diferentes
+         T= 30 | Média de 37.73 bits diferentes
+         T= 40 | Média de 37.73 bits diferentes
+         T= 50 | Média de 37.73 bits diferentes
+         T= 60 | Média de 37.73 bits diferentes
+         T= 70 | Média de 37.73 bits diferentes
+         T= 80 | Média de 37.73 bits diferentes
+         T= 90 | Média de 37.73 bits diferentes
+
+  [>] TAPS DE CONTROLE: {448, 449, 450}
+      Topologia: CONCENTRADOS NO FINAL (A diferença viaja o máximo possível antes do impacto)
+      -> TAXA DE SOBREVIVÊNCIA DA DIFERENÇA: 91.00%
+      -> EVOLUÇÃO DO PESO DE HAMMING (Difusão Média):
+         T=  0 | Média de 1.00 bits diferentes
+         T= 10 | Média de 36.52 bits diferentes
+         T= 20 | Média de 36.52 bits diferentes
+         T= 30 | Média de 36.52 bits diferentes
+         T= 40 | Média de 36.52 bits diferentes
+         T= 50 | Média de 36.52 bits diferentes
+         T= 60 | Média de 36.52 bits diferentes
+         T= 70 | Média de 36.52 bits diferentes
+         T= 80 | Média de 36.52 bits diferentes
+         T= 90 | Média de 36.52 bits diferentes
+
