@@ -1,0 +1,97 @@
+=== Stress Test: Higher-Order Differential vs. Alto Grau Algebrico ===
+Objetivo: mostrar que D^2 de 2a ordem e EFETIVO contra grau-2 (Toyocrypt)
+          mas INEFETIVO contra funcoes de grau deg-1 (alto grau).
+
+alpha = x^0,  beta = x^10
+
+
+[Config 1] GF(2^31)
+  [A] grau-2 (Toyocrypt original)
+      D2 matches / checks : 512 / 512  rate=1
+      variações D2        : 200
+      decisão             : CONSISTENTE  (D2 constante, ataque efetivo)
+  [B] grau-30 (alto grau, 30 bits em AND)
+      D2 matches / checks : 292 / 512  rate=0.570312
+      variações D2        : 0
+      decisão             : INCONSISTENTE (D2 variavel, ataque FALHA)
+
+[Config 2] GF(2^64)
+  [A] grau-2 (Toyocrypt original)
+      D2 matches / checks : 1280 / 1280  rate=1
+      variações D2        : 405
+      decisão             : CONSISTENTE  (D2 constante, ataque efetivo)
+  [B] grau-30 (alto grau, 30 bits em AND)
+      D2 matches / checks : 895 / 1280  rate=0.699219
+      variações D2        : 0
+      decisão             : INCONSISTENTE (D2 variavel, ataque FALHA)
+
+[Config 3] GF(2^64)
+  [A] grau-2 (Toyocrypt original)
+      D2 matches / checks : 768 / 768  rate=1
+      variações D2        : 333
+      decisão             : CONSISTENTE  (D2 constante, ataque efetivo)
+  [B] grau-30 (alto grau, 30 bits em AND)
+      D2 matches / checks : 351 / 768  rate=0.457031
+      variações D2        : 0
+      decisão             : INCONSISTENTE (D2 variavel, ataque FALHA)
+
+[Config 4] GF(2^128)
+  [A] grau-2 (Toyocrypt original)
+      D2 matches / checks : 1024 / 1024  rate=1
+      variações D2        : 472
+      decisão             : CONSISTENTE  (D2 constante, ataque efetivo)
+  [B] grau-30 (alto grau, 30 bits em AND)
+      D2 matches / checks : 470 / 1024  rate=0.458984
+      variações D2        : 0
+      decisão             : INCONSISTENTE (D2 variavel, ataque FALHA)
+
+[Config 5] GF(2^256)
+  [A] grau-2 (Toyocrypt original)
+      D2 matches / checks : 2048 / 2048  rate=1
+      variações D2        : 938
+      decisão             : CONSISTENTE  (D2 constante, ataque efetivo)
+  [B] grau-30 (alto grau, 30 bits em AND)
+      D2 matches / checks : 978 / 2048  rate=0.477539
+      variações D2        : 0
+      decisão             : INCONSISTENTE (D2 variavel, ataque FALHA)
+
+[Config 6] GF(2^271)
+  [A] grau-2 (Toyocrypt original)
+      D2 matches / checks : 1084 / 1084  rate=1
+      variações D2        : 569
+      decisão             : CONSISTENTE  (D2 constante, ataque efetivo)
+  [B] grau-30 (alto grau, 30 bits em AND)
+      D2 matches / checks : 543 / 1084  rate=0.500923
+      variações D2        : 0
+      decisão             : INCONSISTENTE (D2 variavel, ataque FALHA)
+
+[Config 7] GF(2^291)
+  [A] grau-2 (Toyocrypt original)
+      D2 matches / checks : 1164 / 1164  rate=1
+      variações D2        : 608
+      decisão             : CONSISTENTE  (D2 constante, ataque efetivo)
+  [B] grau-30 (alto grau, 30 bits em AND)
+      D2 matches / checks : 604 / 1164  rate=0.5189
+      variações D2        : 0
+      decisão             : INCONSISTENTE (D2 variavel, ataque FALHA)
+
+[Config 8] GF(2^451)
+  [A] grau-2 (Toyocrypt original)
+      D2 matches / checks : 1804 / 1804  rate=1
+      variações D2        : 881
+      decisão             : CONSISTENTE  (D2 constante, ataque efetivo)
+  [B] grau-30 (alto grau, 30 bits em AND)
+      D2 matches / checks : 1104 / 1804  rate=0.611973
+      variações D2        : 0
+      decisão             : INCONSISTENTE (D2 variavel, ataque FALHA)
+
+=======================================================
+ RESUMO FINAL
+=======================================================
+ [A] grau-2 (Toyocrypt)  → ataque de 2a ordem : EFETIVO  ✓
+ [B] grau altissimo      → ataque de 2a ordem : INEFETIVO ✓ (esperado)
+=======================================================
+ CONCLUSÃO: O diferencial de 2a ordem é seletivo ao grau algebrico.
+            Funções com grau >= 3 não são capturadas por este ataque.
+            A vulnerabilidade da Toyocrypt reside no baixo grau (2) da f.
+=======================================================

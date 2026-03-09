@@ -1,0 +1,60 @@
+=== Relatorio: Differential Correlation Attack ===
+=== Differential Correlation Attack Check ===
+
+[Config 1] GF(2^31)
+  phi(z, s20) target      : 0.511051
+  phi(z, s20) random      : 0.0651183
+  phi(dz, s10) target     : 1
+  phi(dz, s10) random     : 0.0629373
+  decision                : CONSISTENTE
+
+[Config 2] GF(2^64)
+  phi(z, s20) target      : 0.506061
+  phi(z, s20) random      : -0.0253029
+  phi(dz, s10) target     : 1
+  phi(dz, s10) random     : 0.0424263
+  decision                : CONSISTENTE
+
+[Config 3] GF(2^64)
+  phi(z, s20) target      : 0.512341
+  phi(z, s20) random      : 0.0292154
+  phi(dz, s10) target     : 1
+  phi(dz, s10) random     : -0.00917286
+  decision                : CONSISTENTE
+
+[Config 4] GF(2^128)
+  phi(z, s20) target      : 0.460482
+  phi(z, s20) random      : -0.0407999
+  phi(dz, s10) target     : 1
+  phi(dz, s10) random     : -0.034597
+  decision                : CONSISTENTE
+
+[Config 5] GF(2^256)
+  phi(z, s20) target      : 0.497887
+  phi(z, s20) random      : -0.0287458
+  phi(dz, s10) target     : 1
+  phi(dz, s10) random     : 0.00495286
+  decision                : CONSISTENTE
+
+[Config 6] GF(2^271)
+  phi(z, s20) target      : 0.509063
+  phi(z, s20) random      : 0.00353749
+  phi(dz, s10) target     : 1
+  phi(dz, s10) random     : -2.38307e-05
+  decision                : CONSISTENTE
+
+[Config 7] GF(2^291)
+  phi(z, s20) target      : 0.464059
+  phi(z, s20) random      : -0.00147195
+  phi(dz, s10) target     : 1
+  phi(dz, s10) random     : 0.010284
+  decision                : CONSISTENTE
+
+[Config 8] GF(2^451)
+  phi(z, s20) target      : 0.507507
+  phi(z, s20) random      : -0.0413763
+  phi(dz, s10) target     : 1
+  phi(dz, s10) random     : -0.021093
+  decision                : CONSISTENTE
+
+=== RESULTADO GLOBAL: CONSISTENTE ===

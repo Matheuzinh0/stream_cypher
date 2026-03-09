@@ -1,0 +1,45 @@
+=== Relatorio: Higher-Order Differential (2nd order) ===
+=== Higher-Order Differential Check (2nd order) ===
+alpha = x^0, beta = x^10
+
+[Config 1] GF(2^31)
+  observed vs predicted : 512 / 512 (rate=1)
+  random baseline rate  : 0.517578
+  decision              : CONSISTENTE
+
+[Config 2] GF(2^64)
+  observed vs predicted : 1280 / 1280 (rate=1)
+  random baseline rate  : 0.478125
+  decision              : CONSISTENTE
+
+[Config 3] GF(2^64)
+  observed vs predicted : 768 / 768 (rate=1)
+  random baseline rate  : 0.511719
+  decision              : CONSISTENTE
+
+[Config 4] GF(2^128)
+  observed vs predicted : 1024 / 1024 (rate=1)
+  random baseline rate  : 0.486328
+  decision              : CONSISTENTE
+
+[Config 5] GF(2^256)
+  observed vs predicted : 2048 / 2048 (rate=1)
+  random baseline rate  : 0.506836
+  decision              : CONSISTENTE
+
+[Config 6] GF(2^271)
+  observed vs predicted : 1084 / 1084 (rate=1)
+  random baseline rate  : 0.527675
+  decision              : CONSISTENTE
+
+[Config 7] GF(2^291)
+  observed vs predicted : 1164 / 1164 (rate=1)
+  random baseline rate  : 0.489691
+  decision              : CONSISTENTE
+
+[Config 8] GF(2^451)
+  observed vs predicted : 1804 / 1804 (rate=1)
+  random baseline rate  : 0.500554
+  decision              : CONSISTENTE
+
+=== RESULTADO GLOBAL: CONSISTENTE ===

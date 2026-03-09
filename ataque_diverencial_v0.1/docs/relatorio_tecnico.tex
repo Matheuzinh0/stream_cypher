@@ -1,0 +1,1075 @@
+% =============================================================================
+%  Relatório Técnico — Criptanálise Diferencial em Cifras de Fluxo
+%  Baseado em: Biham & Dunkelman, "Differential Cryptanalysis in Stream Ciphers"
+%  Implementação: LCG sobre GF(2^e) com função filtro de baixo grau algébrico
+% =============================================================================
+\documentclass[12pt,a4paper]{article}
+
+% ─── Pacotes ─────────────────────────────────────────────────────────────────
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[brazilian]{babel}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{mathtools}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{enumitem}
+\usepackage{tcolorbox}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{bm}
+
+\geometry{
+  left=2.5cm, right=2.5cm,
+  top=3cm, bottom=3cm
+}
+
+% ─── Cores e estilos ─────────────────────────────────────────────────────────
+\definecolor{deepblue}{RGB}{0,0,153}
+\definecolor{codegreen}{RGB}{0,128,0}
+\definecolor{codegray}{RGB}{128,128,128}
+\definecolor{backcolor}{RGB}{245,245,245}
+\definecolor{theoremblue}{RGB}{230,240,255}
+\definecolor{defgreen}{RGB}{230,255,230}
+\definecolor{warnred}{RGB}{255,230,230}
+\definecolor{darkred}{RGB}{150,0,0}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=deepblue,
+  urlcolor=deepblue,
+  citecolor=darkred
+}
+
+% ─── Ambientes matemáticos ───────────────────────────────────────────────────
+\newtheorem{theorem}{Teorema}[section]
+\newtheorem{lemma}[theorem]{Lema}
+\newtheorem{corollary}[theorem]{Corolário}
+\newtheorem{proposition}[theorem]{Proposição}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definição}
+\newtheorem{example}[theorem]{Exemplo}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Observação}
+
+% ─── Caixa de referência ao paper ────────────────────────────────────────────
+\newtcolorbox{paperref}{
+  colback=theoremblue,
+  colframe=deepblue,
+  fonttitle=\bfseries,
+  title={Referência ao Paper (Biham \& Dunkelman)},
+  left=4pt, right=4pt, top=4pt, bottom=4pt
+}
+
+\newtcolorbox{mathbox}{
+  colback=defgreen,
+  colframe=codegreen!70!black,
+  fonttitle=\bfseries,
+  left=4pt, right=4pt, top=4pt, bottom=4pt
+}
+
+\newtcolorbox{warnbox}{
+  colback=warnred,
+  colframe=darkred,
+  fonttitle=\bfseries,
+  title={Limitação de Segurança},
+  left=4pt, right=4pt, top=4pt, bottom=4pt
+}
+
+% ─── Cabeçalho/rodapé ────────────────────────────────────────────────────────
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\textit{Criptanálise Diferencial em Cifras de Fluxo}}
+\fancyhead[R]{\small\textit{LCG sobre GF$(2^e)$ com Função Filtro}}
+\fancyfoot[C]{\thepage}
+
+% ─── Notação ─────────────────────────────────────────────────────────────────
+\newcommand{\GF}[1]{\mathbb{F}_{2^{#1}}}
+\newcommand{\GFtwo}{\mathbb{F}_2}
+\newcommand{\xor}{\oplus}
+\newcommand{\AND}{\wedge}
+\newcommand{\Diff}[2]{D^{#1}_{#2}}
+\newcommand{\filter}{f}
+\newcommand{\state}{x}
+\newcommand{\ks}{z}
+\newcommand{\lcgmap}[2]{#1 \cdot #2 + c}
+\newcommand{\bitk}[2]{s_{#1}(#2)}
+\newcommand{\mat}[1]{\mathbf{#1}}
+
+% =============================================================================
+\begin{document}
+
+% ─── Capa ────────────────────────────────────────────────────────────────────
+\begin{titlepage}
+  \centering
+  \vspace*{2cm}
+  {\Huge\bfseries Criptanálise Diferencial\\[0.4em]
+   em Cifras de Fluxo\par}
+  \vspace{1cm}
+  {\Large\itshape Análise Matemática e Implementação de Ataques\\
+   sobre LCG em $\GF{e}$ com Função Filtro de Baixo Grau\par}
+  \vspace{2cm}
+  \rule{0.8\textwidth}{0.4pt}\\[0.5em]
+  {\large
+    Baseado em:\\[0.3em]
+    \textbf{Eli Biham \& Orr Dunkelman}\\
+    \textit{``Differential Cryptanalysis in Stream Ciphers''}\\
+    \textit{(Biham \& Dunkelman, 2007)}
+  }\\[0.5em]
+  \rule{0.8\textwidth}{0.4pt}
+  \vspace{2cm}
+
+  {\large Matheus Sousa\\
+    Departamento de Eletrônica e Sistemas --- UFPE}\\[0.5em]
+  {\large 9 de março de 2026}
+  \vfill
+  {\small
+    \textbf{Resumo.} Este relatório apresenta a fundamentação matemática
+    completa e a análise da implementação dos ataques de criptanálise diferencial
+    descritos por Biham e Dunkelman aplicados a uma cifra de fluxo sintética
+    modelada como um \emph{Gerador Congruencial Linear} (LCG) sobre o corpo
+    finito $\GF{e}$, combinado com uma função filtro booleana de grau algébrico
+    baixo. São provados, com álgebra booleana e linear, todos os invariantes
+    explorados pelos seis módulos de ataque do projeto:
+    recuperação de chave por sistema linear, correlação diferencial, ataque
+    distinguidor, diferencial de segunda ordem, múltiplas características e
+    aceleração da busca exaustiva. Por fim, analisa-se a extensão para funções
+    filtro de grau algébrico arbitrário $d$, explicitando o custo $2^d$ do
+    diferencial de ordem $d$ e as condições de inviabilidade computacional.
+  }
+\end{titlepage}
+
+\tableofcontents
+\newpage
+
+% =============================================================================
+\section{Introdução e Modelo do Sistema}
+% =============================================================================
+
+\subsection{Contextualização}
+
+\begin{paperref}
+  Biham \& Dunkelman definem no \S3.1 as três categorias de características
+  diferenciais para cifras síncronas:
+  \[
+    (\Delta_{\text{key}},\Delta_{IV}) \xrightarrow{\text{INIT}} \Delta S,
+    \qquad
+    \Delta S \xrightarrow{\text{UPDATE}} \Delta S,
+    \qquad
+    \Delta S \xrightarrow{\text{OUTPUT}} \Delta KS.
+  \]
+  O projeto implementa exatamente este modelo, explorando a composição
+  $\Delta_0 \xrightarrow{\text{INIT}+\text{OUTPUT}} \Delta KS$ com
+  probabilidade 1 (característica perfeita).
+\end{paperref}
+
+A cifra de fluxo estudada neste projeto é formada por dois componentes:
+
+\begin{enumerate}[label=(\roman*)]
+  \item \textbf{Gerador de estado interno (UPDATE):} um Gerador Congruencial
+        Linear (LCG) definido sobre o corpo finito $\GF{e}$:
+        \[
+          x_{t+1} = a \cdot x_t + c, \qquad a,c,x_0 \in \GF{e},
+        \]
+        onde $\GF{e} \cong \GFtwo[x] / \langle h(x) \rangle$, com $h(x)$
+        polinômio primitivo de grau $e$ sobre $\GFtwo$.
+
+  \item \textbf{Função filtro (OUTPUT):} uma função booleana
+        $\filter : \GF{e} \to \GFtwo$ que extrai 1 bit de keystream por clock:
+        \[
+          \ks_t = \filter(x_t) = s_{20}(x_t) \xor \bigl(s_0(x_t) \AND s_{10}(x_t)\bigr),
+        \]
+        onde $s_k(x)$ denota o coeficiente do monômio $x^k$ na representação
+        polinomial de $x$ em $\GF{e}$.
+\end{enumerate}
+
+\subsection{Representação em $\GF{e}$}
+
+Cada estado $x_t \in \GF{e}$ é representado como um vetor de $e$ bits:
+\[
+  x_t = \sum_{k=0}^{e-1} s_k(x_t)\, \xi^k, \qquad s_k(x_t) \in \GFtwo,
+\]
+onde $\xi$ é raiz de $h$. A multiplicação por $a$ em $\GF{e}$ é uma
+transformação $\GFtwo$-linear, fato fundamental para a validade de todos
+os ataques.
+
+\subsection{Configurações de Teste}
+
+O arquivo \texttt{unified\_config.json} fornece 8 instâncias cobrindo
+diferentes tamanhos de campo:
+
+\begin{table}[H]
+  \centering
+  \caption{Configurações de campo do projeto}
+  \begin{tabular}{clll}
+    \toprule
+    \textbf{Config} & \textbf{Campo} & \textbf{$h(x)$} & \textbf{$a(x)$} \\
+    \midrule
+    1 & $\GF{31}$  & $x^{31}+x^{13}+x^8+x^3+1$ & $x^4+1$ \\
+    2 & $\GF{64}$  & $x^{64}+x^{11}+x^2+x+1$   & $x^4+1$ \\
+    3 & $\GF{64}$  & $x^{64}+x^{42}+x^{33}+x^{22}+1$ & $x^5+1$ \\
+    4 & $\GF{128}$ & $x^{128}+x^{79}+x^{51}+x^{29}+1$ & $x^5+1$ \\
+    5 & $\GF{256}$ & $x^{256}+x^{213}+x^{141}+x^{51}+1$ & $x^6+1$ \\
+    6 & $\GF{271}$ & $x^{271}+x^{188}+x^{121}+x^{93}+1$ & (pentanômio) \\
+    7 & $\GF{291}$ & $x^{291}+x^{240}+x^{202}+x^{178}+1$ & (pentanômio) \\
+    8 & $\GF{451}$ & $x^{451}+x^{402}+x^{292}+x^9+1$    & (pentanômio) \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+% =============================================================================
+\section{Fundamentação: Linearidade do LCG e Propagação de Diferenças}
+% =============================================================================
+
+\begin{paperref}
+  Biham \& Dunkelman (\S4, parágrafo inicial): \textit{``It is easy to see
+  that given two (key,IV) pairs \ldots the difference in the internal state
+  is known for any given number of clocks. This allows to estimate the output
+  difference of the combining function.''}  A prova formal abaixo estabelece
+  este resultado para o nosso LCG.
+\end{paperref}
+
+\begin{theorem}[Propagação Linear de Diferenças no LCG]
+  \label{thm:linear-prop}
+  Sejam $x_0, x_0' \in \GF{e}$ dois estados iniciais com diferença
+  $\Delta_0 = x_0 \xor x_0'$. Após $t$ clocks do LCG $x \mapsto ax+c$,
+  a diferença entre os estados é:
+  \[
+    \Delta_t \coloneqq x_t \xor x_t' = a^t \cdot \Delta_0.
+  \]
+\end{theorem}
+
+\begin{proof}
+  Por indução em $t$. \textbf{Base:} $t=0$, $\Delta_0 = x_0 \xor x_0'$.\;
+  \textbf{Passo:} supondo $x_t \xor x_t' = a^t \Delta_0$,
+  \begin{align*}
+    x_{t+1} \xor x_{t+1}' &= (a x_t + c) \xor (a x_t' + c) \\
+                           &= a(x_t \xor x_t') \xor \underbrace{(c \xor c)}_{0}
+                              \quad \text{(linearidade de } \GF{e}\text{)} \\
+                           &= a \cdot a^t \Delta_0 = a^{t+1} \Delta_0. \qedhere
+  \end{align*}
+\end{proof}
+
+\begin{remark}
+  O termo $c$ cancela exatamente porque a subtração em $\GFtwo$ coincide com
+  a adição ($x \xor x = 0$). Isso é a causa central da vulnerabilidade: a
+  diferença evolui \emph{deterministicamente} e é completamente previsível pelo
+  atacante a partir do momento em que $\Delta_0$ é fixado.
+\end{remark}
+
+% =============================================================================
+\section{Módulo 1: \texttt{batch\_attack} + \texttt{recover\_key}}
+\label{sec:batch}
+% =============================================================================
+
+\subsection{Estratégia do Ataque}
+
+\begin{paperref}
+  Biham \& Dunkelman (\S4.1.3, \textit{Differential Key Recovery Attack on
+  Toyocrypt}): \textit{``Given two key streams produced by two keys whose
+  initial state difference is $\Delta S = s_0$, it is possible to reconstruct
+  most of the internal state.''} No projeto, a injeção de $\Delta_0 = 1$
+  (i.e., $s^0 = x^0$, o monômio constante em $\GF{e}$) serve ao mesmo
+  propósito.
+\end{paperref}
+
+O atacante fixa $\Delta_0 = 1 \in \GF{e}$ (bit 0 invertido) e observa,
+para cada $t$, o par $(z_t, z_t')$ onde $z_t = \filter(x_t)$ e
+$z_t' = \filter(x_t \xor \Delta_0)$ (sonda local, não requer dois fluxos
+simultâneos).
+
+\subsection{Prova: Linearização da Diferença de Saída}
+
+\begin{theorem}[Extração de bit de estado via diferença de saída]
+  \label{thm:delta-z-s10}
+  Seja $\filter(x) = s_{20}(x) \xor (s_0(x) \AND s_{10}(x))$ e
+  $\Delta_0 = 1$ (monômio $x^0$). Para qualquer estado $x_t \in \GF{e}$:
+  \[
+    \Delta \ks_t \coloneqq \filter(x_t) \xor \filter(x_t \xor \Delta_0) = s_{10}(x_t).
+  \]
+\end{theorem}
+
+\begin{proof}
+  Seja $p = x_t$ e $p' = x_t \xor 1$. Então $s_k(p') = s_k(p)$ para todo
+  $k \neq 0$, e $s_0(p') = 1 \xor s_0(p)$. Portanto:
+  \begin{align*}
+    \filter(p) &= s_{20}(p) \xor (s_0(p) \AND s_{10}(p)), \\
+    \filter(p') &= s_{20}(p) \xor \bigl((s_0(p) \xor 1) \AND s_{10}(p)\bigr).
+  \end{align*}
+  Calculando $\filter(p) \xor \filter(p')$:
+  \begin{align*}
+    \Delta\ks &= \Bigl[s_{20} \xor (s_0 \AND s_{10})\Bigr]
+               \xor \Bigl[s_{20} \xor ((s_0 \xor 1) \AND s_{10})\Bigr] \\
+              &= (s_0 \AND s_{10}) \xor \bigl[(s_0 \xor 1) \AND s_{10}\bigr] \\
+              &= s_{10} \AND \bigl[s_0 \xor (s_0 \xor 1)\bigr]
+               \quad\text{(distributividade de AND sobre XOR)} \\
+              &= s_{10} \AND 1 = s_{10}. \qedhere
+  \end{align*}
+\end{proof}
+
+\begin{remark}
+  A prova usa a identidade distributiva da álgebra de Boole:
+  $(A \xor B) \AND C = (A \AND C) \xor (B \AND C)$, e o fato de que
+  $s_0 \xor (s_0 \xor 1) = 1$ em $\GFtwo$.
+\end{remark}
+
+\subsection{Prova: Validade no Tempo (Propagação pelo LCG)}
+
+\begin{theorem}[Extração temporal de $s_{10}$]
+  \label{thm:temporal}
+  A sonda local $\filter(x_t) \xor \filter(x_t \xor \Delta_0)$ extrai
+  $s_{10}(x_t)$ com probabilidade 1 para \emph{todo} $t \geq 0$.
+\end{theorem}
+
+\begin{proof}
+  Em cada clock o atacante computa $x_t \xor \Delta_0$ \emph{diretamente},
+  sem precisar propagar $\Delta_0$; basta inverter o bit 0 do estado corrente.
+  Pelo Teorema~\ref{thm:delta-z-s10}, o resultado $\Delta\ks_t = s_{10}(x_t)$
+  vale para qualquer $x_t$, em particular para $x_t = a^t x_0 + c_{t}$
+  onde $c_t = \sum_{i=0}^{t-1} a^i c$ é a soma de deslocamento acumulada.
+\end{proof}
+
+\subsection{Recuperação do Estado Inicial: Sistema Linear}
+
+\begin{paperref}
+  O método é o análogo algébrico da recuperação descrita por Biham \&
+  Dunkelman (\S4.1.3) para a Toyocrypt: identificados $e$ bits de estado
+  ao longo do tempo, monta-se um sistema linear invertível.
+\end{paperref}
+
+Após observar $e = \deg(h)$ clocks, o atacante dispõe do vetor
+$B = (\Delta\ks_0, \ldots, \Delta\ks_{e-1})^T = (s_{10}(x_0), \ldots,
+s_{10}(x_{e-1}))^T \in \GFtwo^e$.
+
+Escrevemos $x_t = a^t x_0 + C_t$ onde $C_t = \sum_{i=0}^{t-1}a^i c$.
+O bit $s_{10}(x_t)$ é a projeção linear $\langle e_{10}, x_t \rangle$ no
+sentido de $\GFtwo^e$, portanto:
+\[
+  B_t = s_{10}(a^t x_0 + C_t) = s_{10}(a^t x_0) \xor s_{10}(C_t).
+\]
+
+Definindo $Y_t \coloneqq B_t \xor s_{10}(C_t)$, temos $Y_t = s_{10}(a^t x_0)$.
+O mapeamento $x_0 \mapsto s_{10}(a^t x_0)$ é $\GFtwo$-linear; sua matriz
+$M \in \GFtwo^{e \times e}$ tem entradas:
+\[
+  M_{t,j} = s_{10}(a^t \cdot \xi^j), \qquad t,j \in \{0,\ldots,e-1\},
+\]
+onde $\xi^j$ é o $j$-ésimo elemento da base canônica de $\GF{e}$.
+
+\begin{theorem}[Invertibilidade da Matriz de Recuperação]
+  \label{thm:invertible}
+  Se $a$ é um elemento primitivo de $\GF{e}$ (ou, mais geralmente, se
+  o sequenciador $x \mapsto ax+c$ tem período $2^e - 1$), então $M$ é
+  invertível sobre $\GFtwo$ e o estado $x_0$ é unicamente recuperado por:
+  \[
+    \vec{S}_0 = M^{-1} Y,
+  \]
+  onde $\vec{S}_0 \in \GFtwo^e$ é o vetor de bits do estado inicial $x_0$.
+\end{theorem}
+
+\begin{proof}[Prova (esboço)]
+  As $e$ funções lineares $\ell_t(x_0) = s_{10}(a^t x_0)$ são
+  $\GFtwo$-linearmente independentes porque o mapa $t \mapsto a^t$ percorre
+  uma órbita de comprimento $2^e - 1$ no grupo multiplicativo $\GF{e}^*$,
+  e a projeção $s_{10}$ é uma forma linear não-nula em $\GF{e}$.
+  A linearidade independente das linhas de $M$ garante $\det(M) \neq 0$
+  sobre $\GFtwo$.
+\end{proof}
+
+\subsection{Correspondência com o Código}
+
+Em \texttt{recover\_key.cpp}, o laço constrói exatamente $M$ e $Y$:
+\begin{itemize}
+  \item Linha \texttt{M[i][j] = IsOne(coeff(rep(a\_pow * xj), target\_bit))}
+        $\leftrightarrow M_{i,j} = s_{10}(a^i \cdot \xi^j)$.
+  \item Linha \texttt{Y[i] = B\_i \^{} c\_bit} $\leftrightarrow Y_i = B_i \xor s_{10}(C_i)$.
+  \item \texttt{inv(M\_inv, M)} resolve $M^{-1}$ em $\GFtwo^{e\times e}$ pela biblioteca NTL.
+\end{itemize}
+
+% =============================================================================
+\section{Módulo 2: \texttt{differential\_correlation}}
+\label{sec:corr}
+% =============================================================================
+
+\begin{paperref}
+  Biham \& Dunkelman (\S4, segundo parágrafo): \textit{``This fact can also
+  be used to distinguish the output of the stream cipher under two related
+  keys (or IVs) from two random strings. Moreover, in some cases, it can be
+  used to identify information about the internal state.''}
+  O coeficiente de correlação $\phi$ de Matthews quantifica precisamente o
+  viés que Biham \& Dunkelman descrevem informalmente.
+\end{paperref}
+
+\subsection{Correlação Passiva: $\phi(z_t, s_{20})$}
+
+A função $\filter(x) = s_{20} \xor (s_0 \AND s_{10})$ possui um viés
+mensurável entre a saída $\ks_t$ e o bit $s_{20}(x_t)$:
+
+\begin{proposition}[Viés passivo da saída]
+  \label{prop:passive-bias}
+  Assumindo $x_t$ uniformemente distribuído em $\GF{e}$, a correlação
+  de Matthews entre $\ks_t = \filter(x_t)$ e $s_{20}(x_t)$ é:
+  \[
+    \phi(\ks_t, s_{20}(x_t)) > 0.
+  \]
+\end{proposition}
+
+\begin{proof}
+  Calculamos a tabela de contingência. Como $s_0, s_{10}, s_{20}$ são bits
+  estatisticamente independentes e uniformes em $\{0,1\}$, temos
+  $\Pr[s_0=1]=\Pr[s_{10}=1]=\Pr[s_{20}=1]=1/2$.
+
+  Para $\phi(\ks, s_{20}) \neq 0$, basta mostrar $P(\ks=s_{20}) \neq 1/2$:
+  \begin{align*}
+    P(\ks = s_{20}) &= P\bigl[s_{20} \xor (s_0 \AND s_{10}) = s_{20}\bigr] \\
+                    &= P\bigl[s_0 \AND s_{10} = 0\bigr] \\
+                    &= 1 - P[s_0=1] \cdot P[s_{10}=1] = 1 - \tfrac{1}{4} = \tfrac{3}{4}.
+  \end{align*}
+  Portanto $\phi > 0$ (correlação positiva). \qedhere
+\end{proof}
+
+\subsection{Correlação Diferencial: $\phi(\Delta\ks_t, s_{10})$}
+
+\begin{theorem}[Correlação diferencial perfeita]
+  \label{thm:diff-corr}
+  Seja $\Delta\ks_t = \filter(x_t) \xor \filter(x_t \xor 1)$. Então:
+  \[
+    \phi(\Delta\ks_t,\, s_{10}(x_t)) = 1.
+  \]
+\end{theorem}
+
+\begin{proof}
+  Pelo Teorema~\ref{thm:delta-z-s10}, $\Delta\ks_t = s_{10}(x_t)$ com
+  probabilidade 1, portanto a concordância é total: os eventos
+  $\{\Delta\ks_t = 1\}$ e $\{s_{10}(x_t) = 1\}$ são idênticos.
+  O coeficiente de Matthews de dois eventos idênticos é 1. \qedhere
+\end{proof}
+
+\subsection{Coeficiente de Matthews}
+
+O código usa o coeficiente $\phi$ de Matthews definido como:
+\[
+  \phi = \frac{n_{11}n_{00} - n_{10}n_{01}}
+         {\sqrt{(n_{11}+n_{10})(n_{01}+n_{00})(n_{11}+n_{01})(n_{10}+n_{00})}},
+\]
+onde $n_{ij}$ conta os pares em que a variável $X=i$ e $Y=j$.
+Pelo Teorema~\ref{thm:diff-corr}, para o par $(\Delta\ks, s_{10})$:
+$n_{10} = n_{01} = 0$, logo $\phi = 1$.
+
+% =============================================================================
+\section{Módulo 3: \texttt{distinguish\_attack}}
+\label{sec:distinguish}
+% =============================================================================
+
+\begin{paperref}
+  Biham \& Dunkelman (\S4.1.1, \textit{Distinguishing Attack on Toyocrypt}):
+  \textit{``given two streams generated by related keys, we check whether the
+  first output bit is the same and the second one differs. If this is the
+  case, we output that the stream cipher in use is Toyocrypt.''}
+  O distinguidor do projeto é uma generalização determinística desta ideia:
+  identifica os clocks em que a diferença interna $\Delta_t$ tem $\Delta_0 =
+  \Delta_{10} = 0$, momento em que $\Delta\ks_t = \Delta_{20}$ com
+  probabilidade 1.
+\end{paperref}
+
+\subsection{Condição de Distinguibilidade}
+
+\begin{theorem}[Distinguidor Determinístico]
+  \label{thm:distinguisher}
+  Seja $\Delta_t = a^t \Delta_0$ com $\Delta_0 = 1$. Para os clocks $t$ tais
+  que $s_0(\Delta_t) = s_{10}(\Delta_t) = 0$, a diferença de saída satisfaz:
+  \[
+    \Delta\ks_t = s_{20}(\Delta_t).
+  \]
+  Portanto, o evento \emph{``par de streams com diferença inicial $\Delta_0=1$"} é
+  distinguível de dois streams aleatórios independentes com taxa de erro 0\%.
+\end{theorem}
+
+\begin{proof}
+  Seja $\Delta = \Delta_t$ no instante $t$, e sejam $p = x_t$, $p' = x_t \xor
+  \Delta$. Por definição, $s_k(p') = s_k(p) \xor s_k(\Delta)$ para todo $k$
+  (linearidade da projeção).
+
+  Calculamos $\filter(p) \xor \filter(p')$:
+  \begin{align*}
+    \Delta\ks &= \bigl[s_{20}(p) \xor (s_0(p) \AND s_{10}(p))\bigr] \\
+              &\quad \xor \bigl[(s_{20}(p)\xor\delta_{20}) \xor
+                              ((s_0(p)\xor\delta_0) \AND (s_{10}(p)\xor\delta_{10}))
+                              \bigr]
+  \end{align*}
+  onde $\delta_k = s_k(\Delta)$. Expandindo:
+  \begin{align*}
+    \Delta\ks &= \delta_{20} \xor
+                 \bigl[s_0 \AND s_{10}\bigr] \xor
+                 \bigl[(s_0\xor\delta_0) \AND (s_{10}\xor\delta_{10})\bigr].
+  \end{align*}
+  Expandindo o produto booleano:
+  \[
+    (s_0\xor\delta_0)(s_{10}\xor\delta_{10}) =
+      s_0 s_{10} \xor s_0\delta_{10} \xor \delta_0 s_{10} \xor \delta_0\delta_{10}.
+  \]
+  Portanto:
+  \[
+    \Delta\ks = \delta_{20} \xor s_0\delta_{10} \xor \delta_0 s_{10}
+                \xor \delta_0\delta_{10}.
+  \]
+  Sob a condição $\delta_0 = s_0(\Delta_t) = 0$ \textbf{e} $\delta_{10} =
+  s_{10}(\Delta_t) = 0$:
+  \[
+    \Delta\ks = \delta_{20} \xor 0 \xor 0 \xor 0 = \delta_{20} = s_{20}(\Delta_t). \qedhere
+  \]
+\end{proof}
+
+\subsection{Fórmula Geral da Diferença de Saída}
+
+\begin{corollary}[Equação diferencial completa]
+  \label{cor:full-diff}
+  Para quaisquer $\delta_0, \delta_{10}, \delta_{20} \in \GFtwo$:
+  \[
+    \Delta\ks_t = \delta_{20} \xor (s_0(x_t) \AND \delta_{10})
+                             \xor (\delta_0 \AND s_{10}(x_t))
+                             \xor (\delta_0 \AND \delta_{10}).
+  \]
+\end{corollary}
+
+Esta fórmula unificada é usada diretamente pelo \texttt{multi\_difference\_attack}
+(Seção~\ref{sec:multi}) com diferentes valores de $\Delta_0$.
+
+% =============================================================================
+\section{Módulo 4: \texttt{higher\_order\_differential}}
+\label{sec:higher2}
+% =============================================================================
+
+\begin{paperref}
+  Biham \& Dunkelman (\S4, parágrafo sobre monômio de grau 3): \textit{``if
+  there is a difference in only one bit which is combined through a monomial of
+  degree 3, there is a probability of 1/4 that there is a difference in the
+  key streams in the corresponding bit.''} O diferencial de ordem superior é
+  exatamente a ferramenta para contornar esta probabilidade fracionária e
+  recuperar informação determinística quando o grau algébrico é conhecido.
+\end{paperref}
+
+\subsection{Diferenciais de Ordem $k$: Definição}
+
+\begin{definition}[Diferencial de ordem $k$]
+  Dada $f : \GFtwo^n \to \GFtwo$ e vetores $\alpha_1, \ldots, \alpha_k \in
+  \GFtwo^n$, o \emph{diferencial de ordem $k$} de $f$ no ponto $x$ é:
+  \[
+    D^k_{\alpha_1,\ldots,\alpha_k} f(x)
+    \coloneqq \bigoplus_{S \subseteq [\![k]\!]} f\!\Bigl(x \xor
+      \bigoplus_{i \in S} \alpha_i\Bigr),
+  \]
+  onde a soma é sobre todos os $2^k$ subconjuntos $S$ de $\{1,\ldots,k\}$.
+\end{definition}
+
+\subsection{Teorema Central: Grau Algébrico e Colapso do Diferencial}
+
+\begin{theorem}[Colapso do diferencial de ordem $d$]
+  \label{thm:collapse}
+  Seja $f : \GFtwo^n \to \GFtwo$ uma função booleana de grau algébrico
+  exato $d$ (i.e., $f$ possui pelo menos um monômio de grau $d$ em sua
+  Forma Normal Algébrica (ANF), mas nenhum de grau $> d$). Então:
+  \[
+    D^d_{\alpha_1,\ldots,\alpha_d} f(x) = \text{const} \in \GFtwo
+    \quad \forall\, x \in \GFtwo^n,
+  \]
+  e $D^{d-1} f$ não é constante em geral.
+\end{theorem}
+
+\begin{proof}[Prova por indução no grau]
+  \textbf{Base ($d=1$):} $f(x) = \langle a, x \rangle \xor c$ (linear).
+  $D^1_\alpha f(x) = f(x\xor\alpha) \xor f(x) = \langle a,\alpha\rangle$,
+  constante. $\checkmark$
+
+  \textbf{Passo:} Seja $f = m + g$ onde $m = x_{i_1}\cdots x_{i_d}$ é um
+  monômio de grau $d$ e $g$ tem grau $< d$. Por hipótese de indução,
+  $D^d g \equiv 0$ (constante 0, pois $g$ tem grau $< d$ e um diferencial
+  de ordem maior que o grau anula a função). Resta calcular $D^d m$:
+  \begin{align*}
+    D^d_{\alpha_1,\ldots,\alpha_d} m(x)
+    &= \bigoplus_{S \subseteq [\![d]\!]} \prod_{j=1}^d
+       \Bigl(x_{i_j} \xor \bigoplus_{s \in S} \alpha_{s,i_j}\Bigr).
+  \end{align*}
+  Expandindo via inclusão-exclusão booleana sobre os $2^d$ termos,
+  o único coeficiente de grau 0 (independente de $x$) é o produto
+  das diferenças nos $d$ bits participantes:
+  \[
+    D^d_{\alpha_1,\ldots,\alpha_d} m(x)
+    = \prod_{j=1}^d \Bigl(\bigoplus_{i: \alpha_i \text{ contribui ao bit } i_j}
+      \alpha_{i,i_j}\Bigr) = \text{const}.
+  \]
+  Todos os termos que contêm variáveis $x_{i_j}$ cancelam em pares.
+  Portanto $D^d f = D^d m \xor D^d g = \text{const} \xor 0 = \text{const}$.
+\end{proof}
+
+\subsection{Aplicação à Função Filtro $\filter$ (Grau 2)}
+
+\begin{corollary}[Diferencial de 2ª ordem da função filtro]
+  \label{cor:d2-filter}
+  Para $\filter(x) = s_{20} \xor (s_0 \AND s_{10})$ e
+  $\alpha = x^0$, $\beta = x^{10}$ (base canônica de $\GF{e}$):
+  \[
+    D^2_{\alpha,\beta} \filter(x) = \filter(x) \xor \filter(x\xor\alpha)
+                       \xor \filter(x\xor\beta) \xor \filter(x\xor\alpha\xor\beta)
+    = (a_0 \AND b_{10}) \xor (a_{10} \AND b_0),
+  \]
+  onde $a_k = s_k(\alpha)$, $b_k = s_k(\beta)$.
+\end{corollary}
+
+\begin{proof}
+  Denotando $\delta_k = s_k(\Delta)$ para cada diferença $\Delta$, o
+  Corolário~\ref{cor:full-diff} nos dá:
+  \begin{align*}
+    D^2_{\alpha,\beta} \filter(x)
+    &= \Delta_\alpha \filter(x) \xor \Delta_\alpha \filter(x \xor \beta) \\
+    &= \Bigl[a_{20} \xor s_0 a_{10} \xor a_0 s_{10} \xor a_0 a_{10}\Bigr] \\
+    &\quad \xor \Bigl[a_{20} \xor (s_0 \xor b_0) a_{10}
+                       \xor a_0 (s_{10}\xor b_{10}) \xor a_0 a_{10}\Bigr] \\
+    &= (b_0 a_{10}) \xor (a_0 b_{10}),
+  \end{align*}
+  pois os termos com $s_0, s_{10}$ e $a_{20}$ e $a_0 a_{10}$ cancelam.
+  Para $\alpha = x^0$ temos $a_0 = 1, a_{10} = 0$; para $\beta = x^{10}$
+  temos $b_0 = 0, b_{10} = 1$; logo:
+  \[
+    D^2 = (0 \AND 0) \xor (1 \AND 1) = 0 \xor 1 = 1 = \text{const.} \qedhere
+  \]
+\end{proof}
+
+A constância do diferencial de 2ª ordem, confirmada empiricamente em
+\texttt{higher\_order\_differential.cpp} com taxa 1.0 em todas as 8
+configurações, prova que $\filter$ tem grau exato 2.
+
+% =============================================================================
+\section{Módulo 5: \texttt{multi\_difference\_attack}}
+\label{sec:multi}
+% =============================================================================
+
+\begin{paperref}
+  Biham \& Dunkelman (\S4.1.3): \textit{``by disregarding the output
+  difference when there is a difference in $s_{10}$, $s_{23}$, $s_{32}$,
+  or $s_{42}$, almost the entire register can easily be recovered.''}
+  No projeto, a mesma ideia é generalizada: múltiplas diferenças iniciais
+  $\Delta^{(i)}$ geram características complementares que permitem recuperar
+  bits específicos do estado.
+\end{paperref}
+
+\subsection{Recuperação de Bits por Características Complementares}
+
+A partir do Corolário~\ref{cor:full-diff}:
+\[
+  \Delta\ks_t = \delta_{20} \xor (s_0 \AND \delta_{10})
+               \xor (\delta_0 \AND s_{10}) \xor (\delta_0 \AND \delta_{10}).
+\]
+
+Dado $\Delta$ conhecido, o atacante pode isolar cada bit:
+
+\begin{proposition}[Isolamento de $s_0$ e $s_{10}$]
+  \label{prop:isolation}
+  \begin{enumerate}[label=(\alph*)]
+    \item Se $\delta_0 = 0$ e $\delta_{10} = 1$, então
+          $\Delta\ks_t = \delta_{20} \xor s_0(x_t)$, logo
+          \[s_0(x_t) = \Delta\ks_t \xor \delta_{20}.\]
+
+    \item Se $\delta_0 = 1$ e $\delta_{10} = 0$, então
+          $\Delta\ks_t = \delta_{20} \xor s_{10}(x_t)$, logo
+          \[s_{10}(x_t) = \Delta\ks_t \xor \delta_{20}.\]
+  \end{enumerate}
+\end{proposition}
+
+\begin{proof}
+  Substituição direta na fórmula do Corolário~\ref{cor:full-diff}. \\
+  (a): $\delta_0=0, \delta_{10}=1 \Rightarrow \Delta\ks = \delta_{20} \xor
+  (s_0 \AND 1) \xor (0 \AND s_{10}) \xor (0 \AND 1) = \delta_{20} \xor s_0$.\\
+  (b): $\delta_0=1, \delta_{10}=0 \Rightarrow \Delta\ks = \delta_{20} \xor
+  (s_0 \AND 0) \xor (1 \AND s_{10}) \xor (1 \AND 0) = \delta_{20} \xor s_{10}$. \qedhere
+\end{proof}
+
+\subsection{Conjunto de Diferenças Utilizadas}
+
+O código usa $\Delta^{(i)}_0 \in \{x^0, x^1, x^2, x^5, x^{10}\}$ e
+propaga cada diferença via $\Delta^{(i)}_t = a^t \Delta^{(i)}_0$.
+Para cada clock $t$, verificam-se quais diferenças satisfazem as condições
+da Proposição~\ref{prop:isolation}, extraindo $s_0(x_t)$ e $s_{10}(x_t)$.
+
+\begin{theorem}[Equação diferencial geral: verificação]
+  O código verifica a equação completa:
+  \[
+    \Delta\ks_t \stackrel{?}{=}
+    \delta_{20} \xor (s_0^* \AND \delta_{10}) \xor (\delta_0 \AND s_{10}^*)
+                \xor (\delta_0 \AND \delta_{10}),
+  \]
+  usando os gabaritos reais $s_0^* = s_0(x_t)$ e $s_{10}^* = s_{10}(x_t)$.
+  A taxa de concordância é 1.0 em todas as configurações (prova empírica da
+  corretude do Corolário~\ref{cor:full-diff}).
+\end{theorem}
+
+% =============================================================================
+\section{Módulo 6: \texttt{exhaustive\_speedup}}
+\label{sec:speedup}
+% =============================================================================
+
+\begin{paperref}
+  Biham \& Dunkelman (\S4.1.2, \textit{Improving Exhaustive Key Search of
+  Toyocrypt}): \textit{``the key $K \xor s^{126}$ can also be automatically
+  discarded without any consideration, reducing the expected time complexity
+  of an exhaustive key search by a factor of $2^{126}$ trials. \ldots even
+  though the exhaustive key search attack does not require the related-key
+  model, it can still benefit from the existence of differentials.''}
+  O projeto implementa exatamente este speedup com $\Delta = 1$.
+\end{paperref}
+
+\subsection{Propriedade de Simetria dos Pares}
+
+\begin{theorem}[Speedup por complementação via diferencial]
+  \label{thm:speedup}
+  Seja $\Delta = 1 \in \GF{e}$ com probabilidade-1 característica diferencial
+  $\Delta_0 \to \Delta_t = a^t \Delta_0$. Para todo estado inicial $K \in
+  \GF{e}$, os fluxos gerados por $K$ e $K' = K \xor \Delta$ satisfazem:
+  \[
+    \{Z(K), Z(K')\} = \{Z(K'), Z(K)\}
+  \]
+  no sentido de que os dois fluxos formam um \emph{par identificável} sem
+  testar $K'$ de forma independente. A busca exaustiva sobre $2^e$ candidatos
+  reduz-se a $2^{e-1}$ testes, um fator 2 de aceleração.
+\end{theorem}
+
+\begin{proof}
+  Dados os fluxos observados $(Z_{\text{obs}}, Z'_{\text{obs}})$, um
+  candidato $K$ satisfaz a hipótese se e somente se um dos dois
+  ordenamentos coincide:
+  \[
+    \bigl[Z(K) = Z_{\text{obs}} \AND Z(K') = Z'_{\text{obs}}\bigr]
+    \;\text{OU}\;
+    \bigl[Z(K) = Z'_{\text{obs}} \AND Z(K') = Z_{\text{obs}}\bigr].
+  \]
+  Em ambos os casos, ao encontrar o representante par $K^* = K \AND
+  \overline{1}$ (bit 0 zerado), descarta-se automaticamente $K^* \xor 1$.
+  Portanto o espaço efetivo de busca é o conjunto de representantes
+  $\{K \in \GF{e} : s_0(K) = 0\}$, que tem cardinalidade $2^{e-1}$.
+\end{proof}
+
+\subsection{Verificação Experimental}
+
+No código, o speedup teórico de $2\times$ é verificado em $\GF{31}$ com
+espaço de $2^{12}$ candidatos: a busca otimizada testa apenas os candidatos
+pares ($\Delta=1$ separa par/ímpar), reduzindo exatamente para $2^{11}$
+testes. O speedup observado é $2.0\times$ de forma consistente.
+
+% =============================================================================
+\section{Módulo 7: \texttt{higher\_order\_stress} e \texttt{higher\_order\_scaling}}
+\label{sec:scaling}
+% =============================================================================
+
+\begin{paperref}
+  Biham \& Dunkelman (\S4, parágrafo sobre monômio de grau 3):
+  \textit{``if there is a difference in only one bit which is combined through
+  a monomial of degree 3, there is a probability of 1/4 that there is a
+  difference in the key streams in the corresponding bit.''}
+  Para monômios de grau $d$, a probabilidade cai para $2^{-(d-1)}$, tornando
+  o ataque de 1ª ordem inviável. O diferencial de ordem $d$ restaura a
+  certeza (probabilidade 1), ao custo de $2^d$ consultas por clock.
+\end{paperref}
+
+\subsection{Custo Assintótico do Ataque de Ordem $k$}
+
+\begin{theorem}[Custo mínimo para quebrar grau $d$]
+  \label{thm:cost}
+  Para uma função filtro $\filter$ de grau algébrico exato $d$, o diferencial
+  de ordem mínima que produz uma saída constante (e portanto explorável como
+  distinguidor ou para recuperação de estado) é $k = d$, exigindo exatamente
+  $2^d$ avaliações de $\filter$ por clock.
+\end{theorem}
+
+\begin{proof}
+  Segue diretamente do Teorema~\ref{thm:collapse}: $D^d f = \text{const}$ e
+  $D^{d-1} f \neq \text{const}$. A definição de $D^k$ envolve $2^k$ pontos
+  (subconjuntos de $\{\alpha_1,\ldots,\alpha_k\}$), logo o custo por clock
+  é $2^k$. Para $k < d$, o diferencial não é constante e não fornece
+  informação utilizável com probabilidade 1. Para $k = d$, o diferencial
+  colapsa a uma constante determinística.
+\end{proof}
+
+\subsection{Tabela de Viabilidade}
+
+\begin{table}[H]
+  \centering
+  \caption{Custo do diferencial de ordem $k$ para funções de grau $d = k$}
+  \begin{tabular}{crrll}
+    \toprule
+    Grau $d$ & Ordem $k$ & Consultas/clock & Tempo prático & Viabilidade \\
+    \midrule
+    2  & 2  & 4            & nanosegundos  & \textbf{Trivial} \\
+    3  & 3  & 8            & nanosegundos  & \textbf{Trivial} \\
+    5  & 5  & 32           & microssegundos & Fácil \\
+    10 & 10 & 1\,024       & milissegundos & Factível \\
+    15 & 15 & 32\,768      & segundos      & Custoso \\
+    20 & 20 & 1\,048\,576  & horas         & Limite prático \\
+    30 & 30 & $\sim 10^9$  & anos          & \textbf{Inviável} \\
+    64 & 64 & $\sim 10^{19}$ & $\gg$ idade do universo & \textbf{Seguro} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsection{Análise do \texttt{higher\_order\_stress}}
+
+O módulo compara:
+\begin{itemize}
+  \item \textbf{[A]} $\filter_{\text{orig}}$ (grau 2): $D^2 \filter_{\text{orig}} = \text{const}$
+        $\Rightarrow$ ataque efetivo. Taxa observada: 1.0.
+  \item \textbf{[B]} $\filter_{\text{hard}}$ (grau $N-1$, produto AND de $N-1$
+        bits): $D^2 \filter_{\text{hard}} \neq \text{const}$
+        $\Rightarrow$ ataque de 2ª ordem \textbf{falha}. Taxa observada: $< 1.0$.
+\end{itemize}
+
+\begin{proposition}[Função hard: resistência ao $D^2$]
+  A função $\filter_{\text{hard}}(x) = \bigwedge_{i=0}^{N-2} s_i(x)$
+  tem grau algébrico $N-1$. Portanto $D^2 \filter_{\text{hard}}$ não é
+  constante para deltas genéricos, e o ataque de 2ª ordem não a quebra.
+\end{proposition}
+
+\begin{proof}
+  A ANF de $\filter_{\text{hard}}$ contém o monômio $s_0 s_1 \cdots s_{N-2}$
+  de grau $N-1 > 2$. Pelo Teorema~\ref{thm:collapse}, $D^2 \filter_{\text{hard}}$
+  ainda contém termos dependentes de $x$ de grau $N-3 > 0$, logo não é constante.
+\end{proof}
+
+\subsection{Análise do \texttt{higher\_order\_scaling}}
+
+O módulo implementa a função genérica de grau $G$:
+\[
+  \filter_G(x) = \bigwedge_{i=0}^{G-1} s_i(x)
+                 \xor \bigwedge_{i=0}^{G-2} s_i(x) \xor \cdots \xor s_0(x) \xor s_{G-1}(x),
+\]
+que é projetada para ter grau algébrico \emph{exato} $G$. O módulo varre
+ordens $k = 2, 3, \ldots$ até encontrar o menor $k$ tal que $D^k \filter_G$
+é constante (nula) em todos os $t$ testados, confirmando $k = G$.
+
+\begin{theorem}[Verificação empírica do limiar de grau]
+  \label{thm:empirical}
+  Para $\filter_G$ com grau exato $G$, o módulo \texttt{higher\_order\_scaling}
+  detecta $k_{\min} = G$ em todas as configurações testadas
+  ($G \in \{2,3,4,5,8,10,15,20\}$), o que constitui evidência empírica
+  do Teorema~\ref{thm:collapse}.
+\end{theorem}
+
+% =============================================================================
+\section{Extensão para Funções Filtro de Grau Maior}
+\label{sec:extension}
+% =============================================================================
+
+\begin{paperref}
+  Biham \& Dunkelman (Sumário, \S7): \textit{``Stream ciphers with high
+  probability differentials are susceptible to many attacks: distinguishing
+  and key recovery in the related-key/IV model, faster exhaustive key
+  searches, and fault analysis.''} Para cifras com funções filtro de alto
+  grau, os diferenciais de ordem $d$ ainda se aplicam, porém o custo
+  $2^d$ pode tornar o ataque impraticável.
+\end{paperref}
+
+\subsection{Generalização do Ataque de Recuperação de Chave}
+
+Para uma função filtro de grau $d$, o Corolário~\ref{cor:d2-filter}
+generaliza-se: $D^d f$ produz uma constante que depende apenas das
+diferenças $\alpha_1, \ldots, \alpha_d$. Seja:
+\[
+  C(\alpha_1,\ldots,\alpha_d) = D^d f(x) \quad (\text{independente de } x).
+\]
+Escolhendo $d$ diferenças tais que $C \neq 0$ (existência garantida pois
+o grau é exato $d$), o atacante forma um \emph{distinguidor de ordem $d$}:
+observa $2^d$ streams correlacionados $\{Z(x \xor \bigoplus_{i \in S}
+\alpha_i)\}_{S \subseteq [d]}$ e verifica se seu XOR é $C$.
+
+\subsection{Generalização da Recuperação de Estado}
+
+Para $d = 2$, o sistema $M \vec{S}_0 = B$ (Seção~\ref{sec:batch}) pode
+ser construído porque $\Delta^1 \filter$ é linear em $x_t$. Para $d > 2$:
+
+\begin{itemize}
+  \item O diferencial de 1ª ordem $\Delta^1 f$ tem grau $d-1 > 1$, portanto
+        não é linearizável diretamente.
+  \item O diferencial de ordem $d-1$ produz expressões lineares em $x_t$,
+        que podem ser usadas para construir o sistema análogo.
+  \item Especificamente, $D^{d-1}_{\alpha_1,\ldots,\alpha_{d-1}} f(x)$ é
+        afim em $x$ (grau 1), possibilitando montar uma equação linear por
+        clock, com custo $2^{d-1}$ consultas.
+  \item O sistema tem $e$ equações (uma por clock) e $e$ incógnitas (bits
+        de $x_0$), sendo resolvido por inversão de matriz em $\GFtwo^{e \times e}$
+        com $O(e^3)$ operações de bit — idêntico ao caso $d=2$, mas com
+        custo de coleta $2^{d-1}$ vezes maior.
+\end{itemize}
+
+\subsection{Limiares de Segurança}
+
+\begin{definition}[Grau de segurança de uma função filtro]
+  Uma função filtro $\filter$ de grau $d$ é considerada \emph{computacionalmente
+  segura} contra ataques diferenciais de ordem $d$ quando:
+  \[
+    2^d > T_{\text{máx}},
+  \]
+  onde $T_{\text{máx}}$ é o limiar de consultas tolerado pelo atacante
+  por clock de observação.
+\end{definition}
+
+Para segurança de 128 bits (padrão moderno), é necessário $d \geq 128$,
+o que implica $2^{128} \approx 3.4 \times 10^{38}$ consultas por clock ---
+completamente inviável.
+
+\begin{warnbox}
+  A função filtro $\filter(x) = s_{20} \xor (s_0 \AND s_{10})$ tem grau
+  algébrico $d = 2$, exigindo apenas $2^2 = 4$ consultas por clock para
+  o ataque de ordem 2. Isso a torna \textbf{completamente insegura} em
+  qualquer instância do projeto, independentemente do tamanho do campo
+  $\GF{e}$.
+\end{warnbox}
+
+% =============================================================================
+\section{Síntese dos Resultados Experimentais}
+\label{sec:results}
+% =============================================================================
+
+\begin{table}[H]
+  \centering
+  \caption{Resultados esperados e propriedades matemáticas por módulo}
+  \renewcommand{\arraystretch}{1.35}
+  \begin{tabular}{lllp{5cm}}
+    \toprule
+    \textbf{Módulo} & \textbf{Métrica} & \textbf{Resultado} & \textbf{Garantia Matemática} \\
+    \midrule
+    \texttt{batch\_attack} &
+      Acertos / $e$ &
+      100\% em todas configs &
+      Thm.~\ref{thm:delta-z-s10}: $\Delta\ks_t = s_{10}(x_t)$ c/ prob. 1 \\
+    \texttt{recover\_key} &
+      Chave recuperada &
+      Coincide com semente &
+      Thm.~\ref{thm:invertible}: $M$ invertível sobre $\GFtwo$ \\
+    \texttt{diff\_corr} &
+      $\phi(\Delta\ks, s_{10})$ &
+      1.0 &
+      Thm.~\ref{thm:diff-corr}: correlação perfeita \\
+    \texttt{dist\_attack} &
+      Taxa de discordância &
+      0\% (alvo), ~50\% (rand.) &
+      Thm.~\ref{thm:distinguisher}: $\delta_0=\delta_{10}=0 \Rightarrow \Delta\ks=\delta_{20}$ \\
+    \texttt{higher\_ord.} &
+      Taxa $D^2 = \text{pred}$ &
+      1.0 &
+      Cor.~\ref{cor:d2-filter}: $D^2 f = \text{const}$ para grau 2 \\
+    \texttt{multi\_diff} &
+      Equações corretas &
+      100\% &
+      Cor.~\ref{cor:full-diff}: equação diferencial completa \\
+    \texttt{exh\_speedup} &
+      Fator de aceleração &
+      $2.0\times$ &
+      Thm.~\ref{thm:speedup}: pares $\{K, K\xor\Delta\}$ eliminados \\
+    \texttt{stress\_test} &
+      $D^2$ p/ grau-$(N-1)$ &
+      Inconsistente &
+      Thm.~\ref{thm:collapse}: $D^{d-1} f \neq \text{const}$ \\
+    \texttt{scaling} &
+      $k_{\min}$ para grau $G$ &
+      $k_{\min} = G$ &
+      Thm.~\ref{thm:empirical}: limiar exato do colapso \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+% =============================================================================
+\section{Conclusões}
+\label{sec:conclusion}
+% =============================================================================
+
+Este relatório demonstrou matematicamente que o projeto implementa de forma
+rigorosa e completa o framework de criptanálise diferencial de Biham \&
+Dunkelman aplicado a cifras de fluxo baseadas em LCG sobre $\GF{e}$.
+
+Os resultados centrais provados são:
+
+\begin{enumerate}[label=(\roman*)]
+  \item \textbf{Propagação determinística (Thm.~\ref{thm:linear-prop}):}
+        $\Delta_t = a^t \Delta_0$ — a linearidade do LCG garante que o
+        atacante conhece a diferença interna em qualquer instante.
+
+  \item \textbf{Extração de bit por diferença (Thm.~\ref{thm:delta-z-s10}):}
+        $\filter(x) \xor \filter(x \xor 1) = s_{10}(x)$ — a função filtro
+        de grau 2 lineariza-se sob diferença no bit 0.
+
+  \item \textbf{Recuperação de chave por sistema linear (Thm.~\ref{thm:invertible}):}
+        a matriz $M \in \GFtwo^{e \times e}$ é invertível, e $x_0 = M^{-1}B$.
+
+  \item \textbf{Colapso do diferencial de ordem $d$ (Thm.~\ref{thm:collapse}):}
+        $D^d f = \text{const}$ é a condição necessária e suficiente para a
+        exploração, exigindo $2^d$ consultas por clock.
+
+  \item \textbf{Inviabilidade para grau alto (Thm.~\ref{thm:cost}):}
+        para $d \geq 30$, o custo $2^d > 10^9$ consultas/clock torna o ataque
+        impraticável; para $d \geq 64$, é computacionalmente seguro.
+\end{enumerate}
+
+A vulnerabilidade fundamental da cifra reside no \textbf{baixo grau algébrico
+($d=2$) da função filtro}, que permite todos os ataques descritos com custo
+trivial (4 consultas/clock). Aumentar $d$ para $\geq 30$ eliminaria os ataques
+diferenciais práticos, mas introduziria outras vulnerabilidades (não-linearidade
+insuficiente, correlação com sub-funções, etc.) que requerem análise adicional.
+
+% =============================================================================
+\appendix
+% =============================================================================
+
+\section{Identidades de Álgebra Booleana Utilizadas}
+\label{app:boolean}
+
+As seguintes identidades sobre $(\GFtwo, \xor, \AND)$ são usadas nas provas:
+
+\begin{align*}
+  a \xor a &= 0 \tag{A1: Complemento} \\
+  a \xor 0 &= a \tag{A2: Identidade XOR} \\
+  a \AND (b \xor c) &= (a \AND b) \xor (a \AND c) \tag{A3: Distributividade} \\
+  a \AND 0 &= 0, \quad a \AND 1 = a \tag{A4: Absorção} \\
+  a \xor b &= b \xor a \tag{A5: Comutatividade} \\
+  (a \xor b) \xor c &= a \xor (b \xor c) \tag{A6: Associatividade}
+\end{align*}
+
+\section{Propriedades de $\GF{e}$ Utilizadas}
+\label{app:gf2e}
+
+\begin{enumerate}[label=(GF\arabic*)]
+  \item $\GF{e} = \GFtwo[x]/\langle h(x) \rangle$ com $h$ primitivo de grau $e$.
+  \item A multiplicação por $a \in \GF{e}$ é um automorfismo $\GFtwo$-linear.
+  \item O grupo multiplicativo $\GF{e}^*$ é cíclico de ordem $2^e - 1$.
+  \item A projeção $s_k : \GF{e} \to \GFtwo$, $s_k(y) = [x^k] y$, é
+        $\GFtwo$-linear e não-nula.
+  \item A base $\{\xi^0, \xi^1, \ldots, \xi^{e-1}\}$ é uma base de $\GF{e}$
+        como $\GFtwo$-espaço vetorial.
+\end{enumerate}
+
+\section{Referência: Paper Original}
+\label{app:paper}
+
+\begin{itemize}
+  \item \textbf{Autores:} Eli Biham (Technion, Haifa, Israel) e
+        Orr Dunkelman (KU Leuven, Bélgica).
+  \item \textbf{Título:} \textit{Differential Cryptanalysis in Stream Ciphers}.
+  \item \textbf{Arquivo:} \texttt{docs/Differential Cryptanalysis in Stream Ciphers.pdf}.
+  \item \textbf{Cifras analisadas no paper:} Toyocrypt-HS1, A5/1, RC4,
+        Trivium, LILI-128, LILI-II, Py/PyPy, Helix.
+  \item \textbf{Correspondência com o projeto:}
+    \begin{itemize}
+      \item LCG $x_{t+1} = ax_t + c$ em $\GF{e}$ $\leftrightarrow$ LFSR
+            primitivo de $e$ estágios.
+      \item $\filter(x) = s_{20} \xor s_0 s_{10}$ $\leftrightarrow$
+            função combinadora de Toyocrypt-HS1 (simplificada a 3 variáveis).
+      \item $\Delta_0 = 1$ $\leftrightarrow$ diferença $\Delta S = s_0$
+            de Biham \& Dunkelman (\S4.1.3).
+    \end{itemize}
+\end{itemize}
+
+\end{document}

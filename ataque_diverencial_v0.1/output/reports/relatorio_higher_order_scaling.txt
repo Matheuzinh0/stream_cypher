@@ -1,0 +1,73 @@
+=== Scaling: Custo do Diferencial de Ordem k para Quebrar Grau d ===
+
+
+[Config 1] GF(2^31)
+  rounds por seed = 32 | consultas/clock = 2^k
+  ─────────────────────────────────────────────────────────
+  Função             | grau | k mín. | consultas/clock | resultado
+  ─────────────────────────────────────────────────────────
+  f_original(grau 2)  | grau=2  | ordem 3 → 2^3=8 consul./clock  → QUEBRADO
+  f_hard(grau 2)      | grau=2  | ordem 3 → 2^3=8 consul./clock  → QUEBRADO
+  f_hard(grau 3)      | grau=3  | ordem 4 → 2^4=16 consul./clock  → QUEBRADO
+  f_hard(grau 4)      | grau=4  | ordem 5 → 2^5=32 consul./clock  → QUEBRADO
+  f_hard(grau 5)      | grau=5  | ordem 6 → 2^6=64 consul./clock  → QUEBRADO
+  f_hard(grau 8)      | grau=8  | ordem 9 → 2^9=512 consul./clock  → QUEBRADO
+  f_hard(grau 10)     | grau=10 | ordem 11 → 2^11=2048 consul./clock  → QUEBRADO
+  f_hard(grau 15)     | grau=15 | ordem 16 → 2^16=65536 consul./clock  → QUEBRADO
+  f_hard(grau 20)     | grau=20 | nao quebrado no intervalo testado
+
+
+[Config 2] GF(2^64)
+  rounds por seed = 32 | consultas/clock = 2^k
+  ─────────────────────────────────────────────────────────
+  Função             | grau | k mín. | consultas/clock | resultado
+  ─────────────────────────────────────────────────────────
+  f_original(grau 2)  | grau=2  | ordem 3 → 2^3=8 consul./clock  → QUEBRADO
+  f_hard(grau 2)      | grau=2  | ordem 3 → 2^3=8 consul./clock  → QUEBRADO
+  f_hard(grau 3)      | grau=3  | ordem 4 → 2^4=16 consul./clock  → QUEBRADO
+  f_hard(grau 4)      | grau=4  | ordem 5 → 2^5=32 consul./clock  → QUEBRADO
+  f_hard(grau 5)      | grau=5  | ordem 6 → 2^6=64 consul./clock  → QUEBRADO
+  f_hard(grau 8)      | grau=8  | ordem 9 → 2^9=512 consul./clock  → QUEBRADO
+  f_hard(grau 10)     | grau=10 | ordem 11 → 2^11=2048 consul./clock  → QUEBRADO
+  f_hard(grau 15)     | grau=15 | ordem 16 → 2^16=65536 consul./clock  → QUEBRADO
+  f_hard(grau 20)     | grau=20 | nao quebrado no intervalo testado
+
+
+=======================================================
+ Custo teórico: diferencial de ordem k = 2^k consultas
+=======================================================
+  k  | consultas/clock | viável?
+  ---+----------------+---------
+  2  | 4               | sim
+  3  | 8               | sim
+  4  | 16              | sim
+  5  | 32              | sim
+  6  | 64              | sim
+  7  | 128             | sim
+  8  | 256             | sim
+  9  | 512             | sim
+  10 | 1024            | sim
+  11 | 2048            | sim
+  12 | 4096            | sim
+  13 | 8192            | sim
+  14 | 16384           | sim
+  15 | 32768           | sim
+  16 | 65536           | sim
+  17 | 131072          | sim
+  18 | 262144          | sim
+  19 | 524288          | sim
+  20 | 1048576         | sim
+  21 | 2097152         | NAO (> 1M)
+  22 | 4194304         | NAO (> 1M)
+  23 | 8388608         | NAO (> 1M)
+  24 | 16777216        | NAO (> 1M)
+  25 | 33554432        | NAO (> 1M)
+
+ CONCLUSAO:
+  - Para quebrar grau d precisa-se de ordem d → custo 2^d por clock.
+  - grau 2  → ordem 2 → 4 consultas  → TRIVIAL
+  - grau 10 → ordem 10 → 1024 consul. → caro mas factível
+  - grau 20 → ordem 20 → ~1M consul.  → limite prático
+  - grau 30 → ordem 30 → ~1B consul.  → INVIÁVEL
+  - grau 64+→ inviável computacionalmente
+=======================================================

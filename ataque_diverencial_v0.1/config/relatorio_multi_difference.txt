@@ -1,0 +1,61 @@
+=== Relatorio: Multi-Difference Differential Attack ===
+=== Multi-Difference Differential Attack ===
+Deltas iniciais (expoentes): 0, 1, 2, 5, 10
+
+[Config 1] GF(2^31)
+  equation matches : 2560 / 2560 (rate=1)
+  recovered s0     : 368
+  recovered s10    : 440
+  recovered both   : 312
+  decision         : CONSISTENTE
+
+[Config 2] GF(2^64)
+  equation matches : 6400 / 6400 (rate=1)
+  recovered s0     : 1015
+  recovered s10    : 715
+  recovered both   : 535
+  decision         : CONSISTENTE
+
+[Config 3] GF(2^64)
+  equation matches : 3840 / 3840 (rate=1)
+  recovered s0     : 582
+  recovered s10    : 570
+  recovered both   : 426
+  decision         : CONSISTENTE
+
+[Config 4] GF(2^128)
+  equation matches : 5120 / 5120 (rate=1)
+  recovered s0     : 808
+  recovered s10    : 792
+  recovered both   : 610
+  decision         : CONSISTENTE
+
+[Config 5] GF(2^256)
+  equation matches : 10240 / 10240 (rate=1)
+  recovered s0     : 1670
+  recovered s10    : 1656
+  recovered both   : 1318
+  decision         : CONSISTENTE
+
+[Config 6] GF(2^271)
+  equation matches : 5420 / 5420 (rate=1)
+  recovered s0     : 861
+  recovered s10    : 864
+  recovered both   : 663
+  decision         : CONSISTENTE
+
+[Config 7] GF(2^291)
+  equation matches : 5820 / 5820 (rate=1)
+  recovered s0     : 924
+  recovered s10    : 922
+  recovered both   : 731
+  decision         : CONSISTENTE
+
+[Config 8] GF(2^451)
+  equation matches : 9020 / 9020 (rate=1)
+  recovered s0     : 1368
+  recovered s10    : 1409
+  recovered both   : 1020
+  decision         : CONSISTENTE
+
+=== RESULTADO GLOBAL: CONSISTENTE ===
